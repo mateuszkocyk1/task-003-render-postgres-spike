@@ -42,6 +42,7 @@ export function roleDatabaseUrl(role, password, applicationName) {
   url.port = requireEnv("DB_PORT");
   url.pathname = `/${encodeURIComponent(requireEnv("DB_NAME"))}`;
   url.searchParams.set("sslmode", "require");
+  url.searchParams.set("schema", "task003");
   url.searchParams.set("application_name", applicationName);
   return url.toString();
 }
