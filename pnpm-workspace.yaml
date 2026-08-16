@@ -1,0 +1,7 @@
+packages:
+  - .
+allowBuilds:
+  "@prisma/engines@7.9.1": true
+  "prisma@7.9.1": true
+autoInstallPeers: false
+strictPeerDependencies: false

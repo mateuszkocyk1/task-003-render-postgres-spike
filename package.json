@@ -1,0 +1,31 @@
+{
+  "name": "@spike/task-003-render-postgres",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.16.0",
+  "engines": {
+    "node": ">=24.14.0 <25",
+    "pnpm": "11.16.0"
+  },
+  "scripts": {
+    "check": "node scripts/check-source.mjs",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "migrator": "node src/migrator.mjs",
+    "web": "node src/web.mjs",
+    "worker": "node src/worker.mjs"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.9.1",
+    "@prisma/client": "7.9.1",
+    "pg": "8.16.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/pg": "8.16.0",
+    "prisma": "7.9.1",
+    "typescript": "7.0.2"
+  }
+}

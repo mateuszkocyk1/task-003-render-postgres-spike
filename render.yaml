@@ -1,0 +1,102 @@
+databases:
+  - name: task003-spike-db-20260816
+    databaseName: task003_spike
+    user: task003_admin
+    plan: free
+    region: frankfurt
+    postgresMajorVersion: "18"
+    connectionPool: none
+    ipAllowList: []
+
+envVarGroups:
+  - name: task003-runtime-secret-20260816
+    envVars:
+      - key: RUNTIME_DB_PASSWORD
+        generateValue: true
+  - name: task003-migrator-secret-20260816
+    envVars:
+      - key: MIGRATOR_DB_PASSWORD
+        generateValue: true
+
+services:
+  - type: web
+    name: task003-spike-migrator-20260816
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm run prisma:generate && pnpm run check
+    startCommand: pnpm run migrator
+    healthCheckPath: /
+    autoDeployTrigger: off
+    envVars:
+      - key: NODE_VERSION
+        value: 24.14.0
+      - key: DB_HOST
+        fromDatabase:
+          name: task003-spike-db-20260816
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: task003-spike-db-20260816
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: task003-spike-db-20260816
+          property: database
+      - key: ADMIN_DATABASE_URL
+        fromDatabase:
+          name: task003-spike-db-20260816
+          property: connectionString
+      - fromGroup: task003-runtime-secret-20260816
+      - fromGroup: task003-migrator-secret-20260816
+
+  - type: web
+    name: task003-spike-web-20260816
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm run prisma:generate && pnpm run check
+    startCommand: pnpm run web
+    healthCheckPath: /health
+    autoDeployTrigger: off
+    envVars:
+      - key: NODE_VERSION
+        value: 24.14.0
+      - key: DB_HOST
+        fromDatabase:
+          name: task003-spike-db-20260816
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: task003-spike-db-20260816
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: task003-spike-db-20260816
+          property: database
+      - fromGroup: task003-runtime-secret-20260816
+
+  - type: worker
+    name: task003-spike-worker-20260816
+    runtime: node
+    plan: starter
+    region: frankfurt
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm run prisma:generate && pnpm run check
+    startCommand: pnpm run worker
+    autoDeployTrigger: off
+    envVars:
+      - key: NODE_VERSION
+        value: 24.14.0
+      - key: DB_HOST
+        fromDatabase:
+          name: task003-spike-db-20260816
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: task003-spike-db-20260816
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: task003-spike-db-20260816
+          property: database
+      - fromGroup: task003-runtime-secret-20260816
