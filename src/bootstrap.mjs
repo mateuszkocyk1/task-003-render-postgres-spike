@@ -53,17 +53,9 @@ export async function bootstrapDatabase() {
     await client.query("REVOKE CREATE ON SCHEMA task003 FROM PUBLIC");
     await client.query("GRANT USAGE, CREATE ON SCHEMA task003 TO task003_migrator");
     await client.query("GRANT USAGE ON SCHEMA task003 TO task003_runtime");
-
-    const migrationHistory = await client.query(
-      "SELECT to_regclass('task003._prisma_migrations') IS NOT NULL AS exists",
-    );
-    if (migrationHistory.rows[0].exists) {
-      await client.query(
-        `GRANT SELECT, INSERT, UPDATE, DELETE
-           ON TABLE task003._prisma_migrations
-           TO task003_migrator`,
-      );
-    }
+    await client.query("CREATE SCHEMA IF NOT EXISTS task003_meta");
+    await client.query("REVOKE ALL ON SCHEMA task003_meta FROM PUBLIC");
+    await client.query("GRANT USAGE, CREATE ON SCHEMA task003_meta TO task003_migrator");
 
     const postgis = await client.query("SELECT PostGIS_Version() AS version");
     return {

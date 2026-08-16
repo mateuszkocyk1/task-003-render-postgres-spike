@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["task003"]
+  schemas  = ["task003", "task003_meta"]
 }
 
 model FixtureProbe {
