@@ -61,7 +61,6 @@ export async function bootstrapDatabase() {
     await client.query("REVOKE CREATE ON SCHEMA task003 FROM PUBLIC");
     await client.query("GRANT USAGE, CREATE ON SCHEMA task003 TO task003_migrator");
     await client.query("GRANT USAGE ON SCHEMA task003 TO task003_runtime");
-    await client.query("GRANT USAGE, CREATE ON SCHEMA public TO task003_migrator");
 
     const postgis = await client.query("SELECT PostGIS_Version() AS version");
     return {
