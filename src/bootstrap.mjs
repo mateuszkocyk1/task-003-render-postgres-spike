@@ -50,12 +50,6 @@ export async function bootstrapDatabase() {
     await client.query("ALTER SCHEMA task003 OWNER TO task003_migrator");
     await client.query("REVOKE CREATE ON SCHEMA task003 FROM PUBLIC");
     await client.query("GRANT USAGE ON SCHEMA task003 TO task003_runtime");
-    await client.query(
-      "ALTER DEFAULT PRIVILEGES FOR ROLE task003_migrator IN SCHEMA task003 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO task003_runtime",
-    );
-    await client.query(
-      "ALTER DEFAULT PRIVILEGES FOR ROLE task003_migrator IN SCHEMA task003 GRANT USAGE, SELECT ON SEQUENCES TO task003_runtime",
-    );
 
     const postgis = await client.query("SELECT PostGIS_Version() AS version");
     return {

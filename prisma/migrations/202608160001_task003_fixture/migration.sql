@@ -13,3 +13,17 @@ CREATE UNIQUE INDEX "fixture_probe_label_key"
 
 CREATE INDEX "fixture_probe_location_gist"
     ON "task003"."fixture_probe" USING GIST ("location");
+
+GRANT SELECT, INSERT, UPDATE, DELETE
+    ON TABLE "task003"."fixture_probe"
+    TO task003_runtime;
+
+GRANT USAGE, SELECT
+    ON SEQUENCE "task003"."fixture_probe_id_seq"
+    TO task003_runtime;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA "task003"
+    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO task003_runtime;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA "task003"
+    GRANT USAGE, SELECT ON SEQUENCES TO task003_runtime;
