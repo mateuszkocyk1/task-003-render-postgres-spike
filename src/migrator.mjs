@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import http from "node:http";
 import pg from "pg";
-import { bootstrapDatabase, grantRuntimePrivileges } from "./bootstrap.mjs";
+import { bootstrapDatabase } from "./bootstrap.mjs";
 import {
   requireEnv,
   roleDatabaseUrl,
@@ -51,7 +51,6 @@ async function initialize() {
   );
   await runMigration(migratorUrl);
   state.migrationApplied = true;
-  await grantRuntimePrivileges();
 
   const pool = new Pool({
     ...runtimePoolConfig("task003-migrator", 1),

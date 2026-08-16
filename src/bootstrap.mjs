@@ -73,17 +73,3 @@ export async function bootstrapDatabase() {
     await pool.end();
   }
 }
-
-export async function grantRuntimePrivileges() {
-  const pool = new Pool(adminPoolConfig());
-  try {
-    await pool.query(
-      "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA task003 TO task003_runtime",
-    );
-    await pool.query(
-      "GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA task003 TO task003_runtime",
-    );
-  } finally {
-    await pool.end();
-  }
-}
