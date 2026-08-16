@@ -22,11 +22,15 @@ const state = {
 
 function runMigration(databaseUrl) {
   return new Promise((resolve, reject) => {
-    const child = spawn("pnpm", ["exec", "prisma", "migrate", "deploy"], {
-      env: { ...process.env, DATABASE_URL: databaseUrl },
-      shell: process.platform === "win32",
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+    const child = spawn(
+      "pnpm",
+      ["exec", "prisma", "migrate", "deploy", "--schema", "prisma/migrate.prisma"],
+      {
+        env: { ...process.env, DATABASE_URL: databaseUrl },
+        shell: process.platform === "win32",
+        stdio: ["ignore", "pipe", "pipe"],
+      },
+    );
     let output = "";
     child.stdout.on("data", (chunk) => { output += chunk; });
     child.stderr.on("data", (chunk) => { output += chunk; });

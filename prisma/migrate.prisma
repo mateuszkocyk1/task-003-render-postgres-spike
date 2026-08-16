@@ -1,10 +1,5 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
-  schemas  = ["task003"]
 }
 
 model FixtureProbe {
@@ -16,5 +11,4 @@ model FixtureProbe {
   createdAt DateTime                                 @default(now()) @map("created_at")
 
   @@map("fixture_probe")
-  @@schema("task003")
 }
