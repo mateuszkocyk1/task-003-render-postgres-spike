@@ -46,9 +46,12 @@ export async function bootstrapDatabase() {
     const databaseIdentifier = `"${database.rows[0].name.replaceAll('"', '""')}"`;
     await client.query(`GRANT CONNECT ON DATABASE ${databaseIdentifier} TO task003_migrator`);
     await client.query(`GRANT CONNECT ON DATABASE ${databaseIdentifier} TO task003_runtime`);
-    await client.query("CREATE SCHEMA IF NOT EXISTS task003 AUTHORIZATION task003_migrator");
-    await client.query("ALTER SCHEMA task003 OWNER TO task003_migrator");
+    // Render's managed admin role can create login roles, but it is not a member
+    // of those roles and therefore cannot transfer schema ownership with SET ROLE.
+    // Keep the fixture schema admin-owned and grant only migration-time DDL here.
+    await client.query("CREATE SCHEMA IF NOT EXISTS task003");
     await client.query("REVOKE CREATE ON SCHEMA task003 FROM PUBLIC");
+    await client.query("GRANT USAGE, CREATE ON SCHEMA task003 TO task003_migrator");
     await client.query("GRANT USAGE ON SCHEMA task003 TO task003_runtime");
 
     const postgis = await client.query("SELECT PostGIS_Version() AS version");
