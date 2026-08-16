@@ -20,9 +20,9 @@ const state = {
   error: null,
 };
 
-function runMigration(databaseUrl) {
+function runPrismaMigrationCommand(databaseUrl, command) {
   return new Promise((resolve, reject) => {
-    const child = spawn("pnpm", ["exec", "prisma", "migrate", "deploy"], {
+    const child = spawn("pnpm", ["exec", "prisma", "migrate", ...command], {
       env: { ...process.env, DATABASE_URL: databaseUrl },
       shell: process.platform === "win32",
       stdio: ["ignore", "pipe", "pipe"],
@@ -33,9 +33,41 @@ function runMigration(databaseUrl) {
     child.on("error", reject);
     child.on("close", (code) => {
       if (code === 0) resolve(sanitizeText(output));
-      else reject(new Error(`Prisma migrate deploy failed (${code}): ${sanitizeText(output)}`));
+      else reject(new Error(
+        `Prisma migrate ${command.join(" ")} failed (${code}): ${sanitizeText(output)}`,
+      ));
     });
   });
+}
+
+async function resolveKnownFailedFixtureMigration(databaseUrl) {
+  const migrationName = "202608160001_task003_fixture";
+  const pool = new Pool({
+    ...runtimePoolConfig("task003-migration-recovery", 1),
+    user: "task003_migrator",
+    password: requireEnv("MIGRATOR_DB_PASSWORD"),
+  });
+  try {
+    const historyTable = await pool.query(
+      "SELECT to_regclass('task003._prisma_migrations') IS NOT NULL AS exists",
+    );
+    if (!historyTable.rows[0].exists) return false;
+    const failed = await pool.query(
+      `SELECT EXISTS (
+         SELECT 1
+           FROM task003._prisma_migrations
+          WHERE migration_name = $1
+            AND finished_at IS NULL
+            AND rolled_back_at IS NULL
+       ) AS exists`,
+      [migrationName],
+    );
+    if (!failed.rows[0].exists) return false;
+    await runPrismaMigrationCommand(databaseUrl, ["resolve", "--rolled-back", migrationName]);
+    return true;
+  } finally {
+    await pool.end();
+  }
 }
 
 async function initialize() {
@@ -49,7 +81,8 @@ async function initialize() {
     requireEnv("MIGRATOR_DB_PASSWORD"),
     "task003-prisma-migrate",
   );
-  await runMigration(migratorUrl);
+  await resolveKnownFailedFixtureMigration(migratorUrl);
+  await runPrismaMigrationCommand(migratorUrl, ["deploy"]);
   state.migrationApplied = true;
   await grantRuntimePrivileges();
 
